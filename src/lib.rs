@@ -1,4 +1,3 @@
-
 use config::Config;
 use daktilo_server::client_proto::{daktilo_client::DaktiloClient, ReportCursorMovementRequest};
 use nvim_oxi as oxi;
@@ -61,8 +60,8 @@ impl BufInfo {
 }
 
 fn start(config: Config) -> oxi::Result<()> {
-    let (sender, reciever) = unbounded_channel::<BufInfo>();
-    let (message_sender, mut message_reciever) = unbounded_channel::<MessageEvent>();
+    let (sender, receiver) = unbounded_channel::<BufInfo>();
+    let (message_sender, mut message_receiver) = unbounded_channel::<MessageEvent>();
 
     api::create_autocmd(
         ["CursorMovedI"],
@@ -83,7 +82,7 @@ fn start(config: Config) -> oxi::Result<()> {
     )?;
 
     let handle = AsyncHandle::new(move || {
-        let message = message_reciever.blocking_recv().unwrap();
+        let message = message_receiver.blocking_recv().unwrap();
         oxi::schedule(move |_| {
             if message.err {
                 api::err_writeln(message.message.as_str());
@@ -97,7 +96,7 @@ fn start(config: Config) -> oxi::Result<()> {
     })?;
 
     std::thread::spawn(move || {
-        start_grpc_client(config.rpc_port, reciever, message_sender, handle)
+        start_grpc_client(config.rpc_port, receiver, message_sender, handle)
     });
 
     Ok(())
@@ -106,7 +105,7 @@ fn start(config: Config) -> oxi::Result<()> {
 #[tokio::main]
 async fn start_grpc_client(
     port: u16,
-    mut reciever: UnboundedReceiver<BufInfo>,
+    mut receiver: UnboundedReceiver<BufInfo>,
     message_sender: UnboundedSender<MessageEvent>,
     message_handle: AsyncHandle,
 ) {
@@ -128,7 +127,7 @@ async fn start_grpc_client(
     message_sender.send("Client connected".into()).unwrap();
     message_handle.send().unwrap();
 
-    while let Some(buf_info) = reciever.recv().await {
+    while let Some(buf_info) = receiver.recv().await {
         let request: ReportCursorMovementRequest = buf_info.into();
         let _ = client.report_cursor_movement(request).await.unwrap();
     }

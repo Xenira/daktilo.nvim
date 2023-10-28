@@ -226,7 +226,7 @@ dependencies = [
 [[package]]
 name = "daktilo_server"
 version = "0.5.0"
-source = "git+https://github.com/Xenira/daktilo.git?branch=daktilo-server#9142bd1a8428caab5a411d221d834b2d9aa015a2"
+source = "git+https://github.com/Xenira/daktilo.git?branch=daktilo-server#b18e75706d1396da00be6e160a2379638bffb611"
 dependencies = [
  "prost",
  "tonic",
