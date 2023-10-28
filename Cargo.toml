@@ -18,3 +18,23 @@ prost = "0.12.1"
 serde = { version = "1.0.190", features = ["derive"] }
 tokio = { version = "1.33.0", features = ["macros", "rt-multi-thread"] }
 tonic = "0.10.2"
+
+[dev-dependencies]
+pretty_assertions = "1.4.0"
+
+[profile.dev]
+opt-level = 0
+debug = true
+panic = "abort"
+
+[profile.test]
+opt-level = 0
+debug = true
+
+[profile.release]
+opt-level = 3
+debug = false
+panic = "unwind"
+lto = true
+codegen-units = 1
+strip = true
