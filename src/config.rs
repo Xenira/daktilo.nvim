@@ -3,12 +3,15 @@ use oxi::conversion::{self, FromObject};
 use oxi::serde::Deserializer;
 use serde::{Deserialize, Serialize};
 
+/// Config is used to store the configuration of the plugin
 #[derive(Serialize, Deserialize)]
 pub(crate) struct Config {
+    /// Port of the RPC server to connect to
     #[serde(default = "default_rpc_port")]
     pub(crate) rpc_port: u16,
 }
 
+/// Default RPC port
 fn default_rpc_port() -> u16 {
     50051
 }

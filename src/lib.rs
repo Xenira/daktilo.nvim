@@ -13,16 +13,25 @@ use oxi::{
 };
 use tokio::sync::mpsc::{unbounded_channel, UnboundedReceiver, UnboundedSender};
 
+/// Configuration of the plugin
 mod config;
 
+/// BufInfo is used to store information about the buffer
 struct BufInfo {
+    /// Column number. 0 indexed
     col: u64,
+    /// Line number. 0 indexed
     line: u64,
+    /// Name of the buffer
     name: Option<String>,
 }
 
+/// MessageEvent is used to send messages to the user
+/// This is needed because the gRPC client runs on a separate thread
 struct MessageEvent {
+    /// Whether the message is an error message
     err: bool,
+    /// Message to be printed to the user
     message: String,
 }
 
@@ -39,12 +48,14 @@ impl From<&str> for MessageEvent {
 }
 
 impl MessageEvent {
+    /// Constructor for MessageEvent
     fn new(err: bool, message: String) -> Self {
         Self { err, message }
     }
 }
 
 impl From<BufInfo> for ReportCursorMovementRequest {
+    /// Converts BufInfo into ReportCursorMovementRequest to be sent to the server
     fn from(buf_info: BufInfo) -> Self {
         Self {
             column_number: buf_info.col,
@@ -55,6 +66,7 @@ impl From<BufInfo> for ReportCursorMovementRequest {
 }
 
 impl BufInfo {
+    /// Constructor for BufInfo
     fn new(name: Option<String>, cursor: (usize, usize)) -> Self {
         Self {
             col: cursor.1 as u64,
@@ -64,6 +76,8 @@ impl BufInfo {
     }
 }
 
+/// Start function for the neovim plugin
+/// This sets up the event listeners and starts the gRPC client
 fn start(config: Config) -> oxi::Result<()> {
     let (sender, receiver) = unbounded_channel::<BufInfo>();
     let (message_sender, mut message_receiver) = unbounded_channel::<MessageEvent>();
@@ -107,6 +121,7 @@ fn start(config: Config) -> oxi::Result<()> {
     Ok(())
 }
 
+/// Starts the gRPC client
 #[tokio::main]
 async fn start_grpc_client(
     port: u16,
@@ -141,6 +156,7 @@ async fn start_grpc_client(
     message_handle.send().unwrap();
 }
 
+/// Daktilo neovim plugin entrypoint
 #[oxi::module]
 fn daktilo_nvim() -> oxi::Result<Dictionary> {
     Ok(Dictionary::from_iter(vec![(
