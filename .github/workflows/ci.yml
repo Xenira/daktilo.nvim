@@ -1,0 +1,118 @@
+name: CI
+
+on:
+  push:
+    pull_request:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: stable
+          targets: x86_64-unknown-linux-gnu
+      - name: Cache
+        uses: Swatinem/rust-cache@v2
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            --no-install-recommends \
+            --allow-unauthenticated \
+            protobuf-compiler
+
+      - name: Build
+        run: cargo build --locked -v
+      - name: Upload
+        uses: actions/upload-artifact@v3
+        with:
+          name: daktilo-nvim-debug
+          path: target/debug/libdaktilo_nvim*
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            --no-install-recommends \
+            --allow-unauthenticated \
+            protobuf-compiler
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+      - name: Install llvm-cov
+        uses: taiki-e/install-action@cargo-llvm-cov
+      - name: Cache
+        uses: Swatinem/rust-cache@v2
+      - name: Generate code coverage
+        run: cargo llvm-cov --lcov --output-path lcov.info
+        env:
+          OUT_DIR: target
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          files: lcov.info
+          fail_ci_if_error: true
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check typos
+        uses: crate-ci/typos@master
+      - name: Validate commit messages
+        run: |
+          git show-ref
+          curl -sSfL https://github.com/convco/convco/releases/latest/download/convco-ubuntu.zip | zcat > convco
+          chmod +x convco
+          ./convco check refs/remotes/origin/master..HEAD
+          rm convco
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+      - name: Cache Cargo dependencies
+        uses: Swatinem/rust-cache@v2
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            --no-install-recommends \
+            --allow-unauthenticated \
+            protobuf-compiler
+
+
+      - name: Check code formatting
+        run: cargo fmt --all -- --check
+      - name: Check lints
+        run: cargo clippy -- -D warnings
+      - name: Run cargo-audit
+        uses: actions-rs/audit-check@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Run msrv
+        shell: bash
+        run: |
+          curl -s 'https://api.github.com/repos/foresterre/cargo-msrv/releases' | \
+            jq -r "[.[] | select(.prerelease == false)][0].assets[] | \
+            select(.name | ascii_downcase | test(\"linux.*x86_64|x86_64.*linux\")).browser_download_url" | \
+            wget -qi -
+          tar -xvf cargo-msrv*.tar* -C  ~/.cargo/bin/ cargo-msrv
+          printf "%s" "Checking MSRV..."
+          cargo msrv --output-format json verify | tail -n 1 | jq --exit-status '.success'
