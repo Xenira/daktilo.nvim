@@ -13,6 +13,21 @@ endif::[]
 :sectnums:
 :source-highlighter: highlight.js
 
+image:https://img.shields.io/github/license/Xenira/daktilo.nvim[License]
+image:https://img.shields.io/github/issues/Xenira/daktilo.nvim[GitHub issues]
+image:https://img.shields.io/github/issues-pr/Xenira/daktilo.nvim[GitHub pull requests]
+image:https://codecov.io/gh/Xenira/daktilo.nvim/graph/badge.svg?token=2QIMJV3L6F["Code Coverage", link="https://codecov.io/gh/Xenira/daktilo.nvim"]
+
+ifdef::env-github[]
+++++
+<p align="center">
+  <img src="assets/daktilo-nvim-logo.png" width="200" />
+</p>
+++++
+endif::[]
+ifndef::env-github[]
+image::assets/daktilo-nvim-logo.png[Logo, width=200, align="center"]
+endif::[]
 
 This is a plugin for Neovim that provides additional functionality for link:https://github.com/orhun/daktilo[daktilo].
 
@@ -24,6 +39,14 @@ endif::[]
 
 == Features
 - Reports the current column number to daktilo while in insert mode. This can be used to play sounds depending on the column number *ding*.
+
+=== Planned
+- Report active / inactive to switch between editor / char based mode in daktilo (not supported by daktilo yet).
+- Report current workspace to daktilo (not supported by daktilo yet).
+
+=== Known issues
+- Daktilo needs to be started before Neovim. Otherwise the plugin will not work.
+- Occasionally crashes nvim :confounded:.
 
 == Installation
 Currently you need to download the plugin binary and import it using lua require. This will be changed in the future.
