@@ -1,0 +1,49 @@
+= daktilo.nvim
+v0.1.0
+ifdef::env-github[]
+:toc:
+:toc-placement!:
+:caution-caption: :fire:
+endif::[]
+ifndef::env-github[]
+:toc: left
+:icons: font
+endif::[]
+:toclevels: 2
+:sectnums:
+:source-highlighter: highlight.js
+
+
+This is a plugin for Neovim that provides additional functionality for link:https://github.com/orhun/daktilo[daktilo].
+
+CAUTION: This plugin is still in early development and is not ready for use. The required features in daktilo are not yet merged and are still subject to change.
+
+ifdef::env-github[]
+toc::[]
+endif::[]
+
+== Features
+- Reports the current column number to daktilo while in insert mode. This can be used to play sounds depending on the column number *ding*.
+
+== Installation
+Currently you need to download the plugin binary and import it using lua require. This will be changed in the future.
+
+```lua
+require('daktilo-nvim').start()
+```
+
+== Configuration
+The plugin can be configured by passing a table to the start function.
+
+```lua
+require('daktilo-nvim').start({
+  -- The port to use for the gRPC server in daktilo.
+  rpc_port = 50051,
+})
+```
+
+== Contributing
+Contributions are welcome. Please open an issue to discuss the changes you would like to make.
+
+== License
+This plugin is licensed under the GPL-3.0 license. See the LICENSE file for more information.
