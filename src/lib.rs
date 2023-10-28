@@ -1,3 +1,8 @@
+//! Neovim plugin for daktilo
+
+#![warn(missing_docs)]
+#![warn(clippy::missing_docs_in_private_items)]
+
 use config::Config;
 use daktilo_server::client_proto::{daktilo_client::DaktiloClient, ReportCursorMovementRequest};
 use nvim_oxi as oxi;
@@ -142,4 +147,49 @@ fn daktilo_nvim() -> oxi::Result<Dictionary> {
         "start",
         Function::from_fn(start),
     )]))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use pretty_assertions::assert_eq;
+
+    #[test]
+    fn test_buff_info_constructor() {
+        let buf_info = BufInfo::new(Some("test".to_string()), (1, 2));
+        assert_eq!(buf_info.col, 2);
+        assert_eq!(buf_info.line, 0);
+        assert_eq!(buf_info.name, Some("test".to_string()));
+    }
+
+    #[test]
+    fn test_buff_info_into_report_cursor_movement_request() {
+        let buf_info = BufInfo::new(Some("test".to_string()), (1, 2));
+        let request: ReportCursorMovementRequest = buf_info.into();
+        assert_eq!(request.column_number, 2);
+        assert_eq!(request.line_number, Some(0));
+        assert_eq!(request.file_path, Some("test".to_string()));
+    }
+
+    #[test]
+    fn test_message_event_from_anyhow_error() {
+        let err = anyhow::anyhow!("test");
+        let message_event = MessageEvent::from(err);
+        assert_eq!(message_event.err, true);
+        assert_eq!(message_event.message, "test".to_string());
+    }
+
+    #[test]
+    fn test_message_event_from_str() {
+        let message_event = MessageEvent::from("test");
+        assert_eq!(message_event.err, false);
+        assert_eq!(message_event.message, "test".to_string());
+    }
+
+    #[test]
+    fn test_message_event_new() {
+        let message_event = MessageEvent::new(true, "test".to_string());
+        assert_eq!(message_event.err, true);
+        assert_eq!(message_event.message, "test".to_string());
+    }
 }
