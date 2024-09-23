@@ -14,7 +14,7 @@ crate-type = ["cdylib"]
 anyhow = "1.0.89"
 daktilo_server = { version = "0.5.0", git = "https://github.com/Xenira/daktilo.git", branch = "daktilo-server" }
 nvim-oxi = { version = "0.5.1", features = ["libuv", "neovim-0-9"] }
-prost = "0.13.2"
+prost = "0.13.3"
 serde = { version = "1.0.210", features = ["derive"] }
 tokio = { version = "1.40.0", features = ["macros", "rt-multi-thread"] }
 tonic = "0.12.2"
