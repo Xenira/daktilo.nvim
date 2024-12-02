@@ -29,7 +29,7 @@ jobs:
       - name: Build
         run: cargo build --locked -v
       - name: Upload
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: daktilo-nvim-debug
           path: target/debug/libdaktilo_nvim*
