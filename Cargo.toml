@@ -16,7 +16,7 @@ daktilo_server = { version = "0.5.0", git = "https://github.com/Xenira/daktilo.g
 nvim-oxi = { version = "0.5.1", features = ["libuv", "neovim-0-9"] }
 prost = "0.13.5"
 serde = { version = "1.0.219", features = ["derive"] }
-tokio = { version = "1.44.2", features = ["macros", "rt-multi-thread"] }
+tokio = { version = "1.45.0", features = ["macros", "rt-multi-thread"] }
 tonic = "0.13.1"
 
 [dev-dependencies]
